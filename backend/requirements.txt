@@ -1,0 +1,6 @@
+fastapi
+pyjwt
+sqlalchemy
+pg8000
+uvicorn
+python-dotenv
