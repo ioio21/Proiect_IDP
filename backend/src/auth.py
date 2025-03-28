@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from functools import wraps
 import os
@@ -48,7 +48,7 @@ class TokenSchema(BaseModel):
 
 def create_jwt_token(data: dict, expires_delta: timedelta = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(UTC) + (expires_delta if expires_delta else timedelta(minutes=15))
+    expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY.encode(), ALGORITHM)
 
