@@ -1,5 +1,4 @@
 # Authentification service
-from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
@@ -7,7 +6,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
 import jwt
-from shared.auth import authenticate_user, authorize_roles
+from shared.auth import authenticate_user, authorize_roles, User, UserWithoutRole, TokenSchema
 
 load_dotenv()
 
@@ -33,18 +32,6 @@ fake_db = {
     }
 }
 
-class User(BaseModel):
-    username: str
-    password: str
-    role: str
-    
-class UserWithoutRole(BaseModel):
-    username: str
-    password: str
-
-class TokenSchema(BaseModel):
-    token: str
-    token_type: str
 
 def create_jwt_token(data: dict, expires_delta: timedelta = None) -> str:
     to_encode = data.copy()

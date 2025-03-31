@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Depends, Request
+from pydantic import BaseModel
+from fastapi import HTTPException, Request
 from functools import wraps
 import os
 from dotenv import load_dotenv
@@ -9,6 +10,19 @@ load_dotenv()
 SECRET_KEY=os.getenv("SECRET_KEY")
 ALGORITHM=os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES=float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+
+class User(BaseModel):
+    username: str
+    password: str
+    role: str
+    
+class UserWithoutRole(BaseModel):
+    username: str
+    password: str
+
+class TokenSchema(BaseModel):
+    token: str
+    token_type: str
 
 def authenticate_user(func):
     @wraps(func)
