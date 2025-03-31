@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
 import jwt
-from shared.auth import authenticate_user, authorize_roles, User, UserWithoutRole, TokenSchema
+from shared.auth import authenticate_user, authorize_roles, UserWithoutRole, TokenSchema
 
 load_dotenv()
 
