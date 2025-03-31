@@ -1,13 +1,13 @@
 # Authentification service
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from functools import wraps
 import os
 import jwt
+from shared.auth import authenticate_user, authorize_roles
 
 load_dotenv()
 
@@ -72,55 +72,20 @@ async def login(user: UserWithoutRole) -> dict:
     token = create_jwt_token({"sub": user.username, "role": role}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"token": token, "token_type": "bearer"}
 
-def authenticate_user(func):
-    @wraps(func)
-    async def wrapper(*args, request: Request, **kwargs):
-        token = request.headers.get("Authorization")
-        
-        if not token or not token.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Invalid token")
-        
-        token = token.split("Bearer ")[1]
-        
-        try:
-            payload = jwt.decode(token.encode(), SECRET_KEY.encode(), algorithms=[ALGORITHM])
-            request.state.user = {
-                "username": payload.get("sub"),
-                "role": payload.get("role")
-            }
-            return await func(*args, request=request, **kwargs)
-        except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail="Token expired")
-        except jwt.PyJWTError as e:
-            print("Error", e)
-            raise HTTPException(status_code=401, detail="Invalid token")
-    return wrapper
-
-def authorize_roles(*roles):
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(*args, request: Request, **kwargs):
-            user = request.state.user
-            if user["role"] not in roles:
-                raise HTTPException(status_code=403, detail="Insufficient permissions")
-            return await func(*args, request=request, **kwargs)
-        return wrapper
-    return decorator
-
 # This is an example of a protected endpoint that needs authentication
-@app.get("/protected/")
+@app.get("/test/auth/protected/")
 @authenticate_user
 async def protected_route(request: Request):
     user = request.state.user
     return {"message": f"Hello, {user['username']}. You have access to this protected route."}
 
 # This is a public endpoint
-@app.get("/public/")
+@app.get("/test/auth/public/")
 async def public_route():
     return {"message": "Hello, this is a public route."}
 
 # This is an example of a protected endpoint that needs authentication and authorization
-@app.get("/admin/")
+@app.get("/test/auth/admin/")
 @authenticate_user
 @authorize_roles("admin", "superadmin")
 async def admin_route(request: Request):
