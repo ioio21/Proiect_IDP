@@ -67,13 +67,13 @@ jobs:
         outputs: type=docker,dest=/tmp/database-service.tar
         
     - name: Upload Auth Service Container
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: auth-service-image
         path: /tmp/auth-service.tar
         
     - name: Upload Database Service Container
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: database-service-image
         path: /tmp/database-service.tar
