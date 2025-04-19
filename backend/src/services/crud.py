@@ -1,8 +1,9 @@
-# database/crud.py
-from sqlalchemy.orm import Session
-from . import models
+"""CRUD operations for database models."""
 from datetime import date
-from typing import List, Optional
+
+from sqlalchemy.orm import Session
+
+from . import models
 
 # Funcții CRUD pentru utilizatori
 def create_user(db: Session, username: str, password: str, role: str = "user"):
@@ -22,7 +23,9 @@ def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
 # Funcții CRUD pentru produse
-def create_product(db: Session, title: str, authors: str, published_date: date, description: str, price: float):
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def create_product(db: Session, title: str, authors: str, published_date: date,
+                  description: str, price: float):
     """Creează un produs nou (lucrare științifică)"""
     db_product = models.Product(
         title=title,
@@ -48,7 +51,7 @@ def search_products(db: Session, query: str, skip: int = 0, limit: int = 100):
     """Caută produse după titlu sau autor"""
     search = f"%{query}%"
     return db.query(models.Product).filter(
-        (models.Product.title.ilike(search)) | 
+        (models.Product.title.ilike(search)) |
         (models.Product.authors.ilike(search)) |
         (models.Product.description.ilike(search))
     ).offset(skip).limit(limit).all()

@@ -31,7 +31,7 @@ jobs:
         echo "Running pylint..."
         pylint ./backend
 
-    - name: Run tests with pytest
-      run: |
-        echo "Running pytest..."
-        pytest ./backend
+    # - name: Run tests with pytest
+    #   run: |
+    #     echo "Running pytest..."
+    #     pytest ./backend

@@ -37,7 +37,11 @@ Accesare cai:
 curl -X 'GET' 'http://127.0.0.1:8000/admin/'      -H 'Authorization: Bearer <token>'
 ```
 
-### Mode de lucru
+### Mod de lucru
+Lintare:
+```
+pylint backend/
+```
 
 #### Autentificare si autorizare
 Toate caile creeate sunt ca default publice. Daca se doreste ca userul sa fie autentificat cand acceseaza ruta se va adauga decoratorul `authenticate_user`.

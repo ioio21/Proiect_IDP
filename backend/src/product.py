@@ -1,20 +1,17 @@
-# Product and order service
-from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Depends, Request
-from dotenv import load_dotenv
-from functools import wraps
-import os
-from .auth import authenticate_user, authorize_roles
+'''
+Product and order service
+'''
+from fastapi import FastAPI
 
 app = FastAPI()
 
 @app.get("/products")
 def get_products():
-    return {"message" : "produsele toate"}  
-
-
-
-# - `GET /products` 
+    '''
+    Get all products
+    '''
+    return {"message" : "all products"}
+# - `GET /products`
 # ```
 # [
 #   {
@@ -28,8 +25,8 @@ def get_products():
 #   ...
 # ]
 # ```
-# - `GET /products/search?q=<query>` 
-# - `POST /orders` 
+# - `GET /products/search?q=<query>`
+# - `POST /orders`
 # ```
 # # Request
 # {
