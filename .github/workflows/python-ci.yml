@@ -60,7 +60,7 @@ jobs:
         context: ./backend
         file: ./backend/Auth.Dockerfile
         push: true
-        tags: fromulesc-ioio-idp/auth-service:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
         
         
         
