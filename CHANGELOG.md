@@ -14,11 +14,16 @@
 - 31 martie - Dockerfile pentru serviciul de autentificare backend (@Florin Romulescu)
 - 18 aprilie - Workflow de CI pentru Python (@Florin Romulescu)
 - 26 aprilie - Adaugat CHANGELOG (@ioio21)
-- 26 aprilie - Modificat structura CHANGELOG (@Florin Romulescu)
+- 26 aprilie - Adaugat serviciu de orders (@ioio21)
+
+
 
 ### Schimbari
 - 26 aprilie - Workflow-ul de CI pentru a folosi ruff în loc de pylint (@Florin Romulescu)
 - 26 aprilie - Configurația docker-compose pentru PostgreSQL 13 (@Florin Romulescu)
+- 26 aprilie - Modificat structura CHANGELOG (@Florin Romulescu)
+- 26 aprilie - Modificat structura crud.py + adaugat functionalitati noi de orders (@ioio21)
+- 26 aprilie - Refactorizat order service (@ioio21)
 
 ### Fixat
 - 18 aprilie - Formatarea versiunii Python în workflow-ul de CI (@Florin Romulescu)
