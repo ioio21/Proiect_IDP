@@ -40,7 +40,10 @@ curl -X 'GET' 'http://127.0.0.1:8000/admin/'      -H 'Authorization: Bearer <tok
 ### Mod de lucru
 Lintare:
 ```
-pylint backend/
+ruff check backend/
+```
+```
+ruff check --fix
 ```
 
 #### Autentificare si autorizare

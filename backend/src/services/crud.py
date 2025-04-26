@@ -1,5 +1,4 @@
 """CRUD operations for database models."""
-from datetime import date
 
 from sqlalchemy.orm import Session
 

@@ -3,7 +3,6 @@
 This module provides functionality for creating and managing orders.
 """
 import logging
-from datetime import datetime
 from typing import List
 
 from fastapi import FastAPI, HTTPException, Depends
