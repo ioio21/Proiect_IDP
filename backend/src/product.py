@@ -88,28 +88,3 @@ def search_products(
     except Exception as e:
         logger.error("Error searching products: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
-
-
-@app.post("/orders", response_model=OrderResponse)
-def create_order(order: OrderRequest, db = Depends(get_db)):
-    """Create a new order for a product."""
-    try:
-        # Verify that the product exists
-        product = crud.get_product(db, product_id=order.product_id)
-        if not product:
-            raise HTTPException(status_code=404, detail="Product not found")
-
-        # Verify that the user exists
-        user = crud.get_user(db, user_id=order.user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # Create the order
-        new_order = crud.create_order(db, user_id=order.user_id, product_id=order.product_id)
-        return new_order
-    except HTTPException:
-        # Re-raise HTTP exceptions as-is
-        raise
-    except Exception as e:
-        logger.error("Error creating order: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e

@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from typing import List
 
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 
 from .services.database import get_db
@@ -25,7 +25,7 @@ class BaseConfig:
     orm_mode = True
 
 
-# Models for request/response - matching with database service
+# Models for request/response
 class OrderRequest(BaseModel):
     """Order request model for creating a new order."""
     user_id: int
@@ -44,11 +44,6 @@ class OrderResponse(BaseModel):
         pass
 
 
-class OrderStatusUpdate(BaseModel):
-    """Model for order status update."""
-    status: str
-
-
 # Health endpoint
 @app.get("/health")
 def health_check():
@@ -56,7 +51,7 @@ def health_check():
     return {"status": "healthy"}
 
 
-@app.post("/orders", response_model=OrderResponse)
+@app.post("/orders", response_model=OrderResponse, status_code=201)
 def create_order(order: OrderRequest, db = Depends(get_db)):
     """Create a new order for a product."""
     try:
@@ -81,6 +76,17 @@ def create_order(order: OrderRequest, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 
+@app.get("/orders", response_model=List[OrderResponse])
+def get_orders(db = Depends(get_db)):
+    """Get a list of all orders."""
+    try:
+        orders = crud.get_orders(db)
+        return orders
+    except Exception as e:
+        logger.error("Error retrieving orders: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
+
+
 @app.get("/orders/{order_id}", response_model=OrderResponse)
 def get_order(order_id: int, db = Depends(get_db)):
     """Get an order by ID."""
@@ -96,42 +102,16 @@ def get_order(order_id: int, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 
-@app.get("/orders", response_model=List[OrderResponse])
-def get_orders(skip: int = 0, limit: int = 100, db = Depends(get_db)):
-    """Get a list of orders with pagination."""
-    try:
-        orders = crud.get_orders(db, skip=skip, limit=limit)
-        return orders
-    except Exception as e:
-        logger.error("Error retrieving orders: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
-
-
-@app.put("/orders/{order_id}/status", response_model=OrderResponse)
-def update_order_status(order_id: int, order_status: OrderStatusUpdate, db = Depends(get_db)):
-    """Update the status of an order."""
-    try:
-        db_order = crud.update_order_status(db, order_id=order_id, status=order_status.status)
-        if db_order is None:
-            raise HTTPException(status_code=404, detail="Order not found")
-        return db_order
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("Error updating order status: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
-
-
 @app.get("/users/{user_id}/orders", response_model=List[OrderResponse])
-def get_user_orders(user_id: int, skip: int = 0, limit: int = 100, db = Depends(get_db)):
-    """Get all orders for a specific user with pagination."""
+def get_user_orders(user_id: int, db = Depends(get_db)):
+    """Get all orders for a specific user."""
     try:
         # Verify user exists
         user = crud.get_user(db, user_id=user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
             
-        orders = crud.get_user_orders(db, user_id=user_id, skip=skip, limit=limit)
+        orders = crud.get_user_orders(db, user_id=user_id)
         return orders
     except HTTPException:
         raise
