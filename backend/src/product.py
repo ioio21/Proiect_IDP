@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 # Initialize FastAPI application
 app = FastAPI(title="Product Service")
 
+
+class BaseConfig:
+    """Base Pydantic configuration."""
+    orm_mode = True
+
+
 # Models for request/response
 class ProductResponse(BaseModel):
     """Product model representing a publication item."""
@@ -30,14 +36,15 @@ class ProductResponse(BaseModel):
     description: str
     price: float
 
-    class Config:
+    class Config(BaseConfig):
         """Pydantic configuration."""
-        orm_mode = True
+
 
 class OrderRequest(BaseModel):
     """Order request model for creating a new order."""
     user_id: int
     product_id: int
+
 
 class OrderResponse(BaseModel):
     """Order response model returned after order creation."""
@@ -46,74 +53,46 @@ class OrderResponse(BaseModel):
     product_id: int
     status: str
 
-    class Config:
+    class Config(BaseConfig):
         """Pydantic configuration."""
-        orm_mode = True
 
-# Health endpoint
+
 @app.get("/health")
 def health_check():
     """Health check endpoint to verify service status."""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
+
 @app.get("/products", response_model=List[ProductResponse])
 def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
-    """Get all available products.
-
-    Args:
-        skip: Number of records to skip for pagination
-        limit: Maximum number of records to return
-        db: Database session
-
-    Returns:
-        A list of all products
-    """
+    """Get all available products."""
     try:
         products = crud.get_products(db, skip=skip, limit=limit)
         return products
     except Exception as e:
-        logger.error(f"Error retrieving products: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        logger.error("Error retrieving products: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
+
 
 @app.get("/products/search", response_model=List[ProductResponse])
 def search_products(
     q: str = Query(..., description="Search query"),
-    skip: int = 0, 
-    limit: int = 100, 
+    skip: int = 0,
+    limit: int = 100,
     db = Depends(get_db)
 ):
-    """Search for products by title, author, or description.
-
-    Args:
-        q: The search query string
-        skip: Number of records to skip for pagination
-        limit: Maximum number of records to return
-        db: Database session
-
-    Returns:
-        A list of products matching the search criteria
-    """
+    """Search for products by title, author, or description."""
     try:
         products = crud.search_products(db, query=q, skip=skip, limit=limit)
         return products
     except Exception as e:
-        logger.error(f"Error searching products: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        logger.error("Error searching products: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
+
 
 @app.post("/orders", response_model=OrderResponse)
 def create_order(order: OrderRequest, db = Depends(get_db)):
-    """Create a new order for a product.
-
-    Args:
-        order: Order request containing user_id and product_id
-        db: Database session
-
-    Returns:
-        Order response with order details
-
-    Raises:
-        HTTPException: If the product_id is invalid or user_id doesn't exist
-    """
+    """Create a new order for a product."""
     try:
         # Verify that the product exists
         product = crud.get_product(db, product_id=order.product_id)
@@ -132,9 +111,5 @@ def create_order(order: OrderRequest, db = Depends(get_db)):
         # Re-raise HTTP exceptions as-is
         raise
     except Exception as e:
-        logger.error(f"Error creating order: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+        logger.error("Error creating order: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
