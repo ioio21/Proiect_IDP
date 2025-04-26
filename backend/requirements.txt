@@ -6,7 +6,7 @@ uvicorn
 python-dotenv
 pydantic
 passlib
-pylint
+ruff
 pytest
 httpx
 psycopg2-binary

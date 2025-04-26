@@ -3,17 +3,15 @@
 This module provides functionality for listing products, searching products,
 and creating orders by interacting with the database service.
 """
-import os
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from fastapi import FastAPI, HTTPException, Query, Depends
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from .services.database import get_db
-from .services import models, crud
+from .services import crud
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
