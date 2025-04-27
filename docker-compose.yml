@@ -76,6 +76,26 @@ services:
     ports:
       - "8080:8000"
 
+  # Product service
+  product-service:
+    build:
+      context: ./backend
+      dockerfile: Product.Dockerfile
+    container_name: product-service
+    restart: always
+    ports:
+      - "8082:8002"
+
+  # Orders service
+  orders-service:
+    build:
+      context: ./backend
+      dockerfile: Orders.Dockerfile
+    container_name: orders-service
+    restart: always
+    ports:
+      - "8083:8003"
+
   # Database service
   database-service:
     build:
