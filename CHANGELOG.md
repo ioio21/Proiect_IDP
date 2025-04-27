@@ -15,6 +15,8 @@
 - 18 aprilie - Workflow de CI pentru Python (@Florin Romulescu)
 - 26 aprilie - Adaugat CHANGELOG (@ioio21)
 - 26 aprilie - Adaugat serviciu de orders (@ioio21)
+- 27 aprilie - Adaugat Dockerfiles pentru serviciile Product și Orders (@Florin Romulescu)
+- 27 aprilie - Adaugat serviciile Product și Orders în configurația docker-compose (@Florin Romulescu)
 
 
 
@@ -29,3 +31,4 @@
 - 18 aprilie - Formatarea versiunii Python în workflow-ul de CI (@Florin Romulescu)
 
 ### Eliminate
+- 27 aprilie - Eliminat Dockerfiles nefolosite pentru backend și Postgres (@Florin Romulescu)
