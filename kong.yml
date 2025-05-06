@@ -1,0 +1,35 @@
+_format_version: "2.1"
+_transform: true
+
+services:
+  - name: auth-service
+    url: http://auth-service:8000
+    routes:
+      - name: auth-service-route
+        paths:
+          - /auth
+        strip_path: true
+
+  - name: product-service
+    url: http://product-service:8002
+    routes:
+      - name: product-service-route
+        paths:
+          - /products
+        strip_path: true
+
+  - name: orders-service
+    url: http://orders-service:8003
+    routes:
+      - name: orders-service-route
+        paths:
+          - /orders
+        strip_path: true
+
+  - name: database-service
+    url: http://database-service:8001
+    routes:
+      - name: database-service-route
+        paths:
+          - /database
+        strip_path: true 
