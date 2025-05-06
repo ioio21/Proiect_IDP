@@ -2,6 +2,11 @@
 
 ## Changelog
 
+**Versiune**: Milestone 3
+
+### Nou:
+- 06 mai - Setare Kong ca API Gateway pentru aplicatie (@Florin Romulescu)
+
 **Versiune**: Milestone 2
 
 ### Nou
