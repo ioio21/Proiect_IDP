@@ -10,3 +10,4 @@ ruff
 pytest
 httpx
 psycopg2-binary
+prometheus-client>=0.16.0

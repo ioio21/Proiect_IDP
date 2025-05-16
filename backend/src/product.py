@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from .services.database import get_db
 from .services import crud
+from .shared.metrics import setup_metrics
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI application
 app = FastAPI(title="Product Service")
+# Setup Prometheus metrics
+setup_metrics(app)
 
 
 class BaseConfig:
