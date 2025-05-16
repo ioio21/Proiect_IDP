@@ -1,167 +1,67 @@
-"""Authentication service for managing user login, registration, and access control.
-
-This module provides functionality for user authentication and authorization,
-including password hashing, JWT token generation, and role-based access control.
-"""
+"""Authentication and authorization utilities for the application."""
 import os
-from datetime import datetime, timedelta
+from functools import wraps
 
-import jwt
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
-from .shared.auth import authenticate_user, authorize_roles, UserWithoutRole, TokenSchema
-from .shared.metrics import setup_metrics
+from fastapi import HTTPException, Request
+from pydantic import BaseModel
+import jwt
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+SECRET_KEY=os.getenv("SECRET_KEY")
+ALGORITHM=os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES=float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
-app = FastAPI()
-# Setup Prometheus metrics
-setup_metrics(app)
+class User(BaseModel):
+    """User model with role information."""
+    username: str
+    password: str
+    role: str
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+class UserWithoutRole(BaseModel):
+    """User model without role information for registration."""
+    username: str
+    password: str
 
-def hash_password(password: str) -> str:
-    """Hash a password using bcrypt algorithm.
+class TokenSchema(BaseModel):
+    """Schema for token response."""
+    token: str
+    token_type: str
 
-    Args:
-        password: The plain text password to hash
+def authenticate_user(func):
+    """Decorator to authenticate users from JWT token in request headers."""
+    @wraps(func)
+    async def wrapper(*args, request: Request, **kwargs):
+        token = request.headers.get("Authorization")
 
-    Returns:
-        The hashed password string
-    """
-    return pwd_context.hash(password)
+        if not token or not token.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Invalid token")
 
-def verify_password(plain_password, hashed_password) -> bool:
-    """Verify a password against its hash.
+        token = token.split("Bearer ")[1]
 
-    Args:
-        plain_password: The plain text password to verify
-        hashed_password: The hashed password to compare against
+        try:
+            payload = jwt.decode(token.encode(), SECRET_KEY.encode(), algorithms=[ALGORITHM])
+            request.state.user = {
+                "username": payload.get("sub"),
+                "role": payload.get("role")
+            }
+            return await func(*args, request=request, **kwargs)
+        except jwt.ExpiredSignatureError as exc:
+            raise HTTPException(status_code=401, detail="Token expired") from exc
+        except jwt.PyJWTError as e:
+            print("Error", e)
+            raise HTTPException(status_code=401, detail="Invalid token") from e
+    return wrapper
 
-    Returns:
-        True if the password matches the hash, False otherwise
-    """
-    return pwd_context.verify(plain_password, hashed_password)
-
-# Fake database. To be removed
-fake_db = {
-    "admin": {
-        "password": hash_password("admin"),
-        "role": "admin",
-    }
-}
-
-
-def create_jwt_token(data: dict, expires_delta: timedelta = None) -> str:
-    """Create a JWT token with the provided data and expiration.
-
-    Args:
-        data: The payload data to encode in the token
-        expires_delta: Optional time delta for token expiration
-
-    Returns:
-        The encoded JWT token
-    """
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY.encode(), ALGORITHM)
-
-# Health check endpoint
-@app.get("/health")
-def health_check():
-    """Health check endpoint to verify service status."""
-    return {"status": "healthy"}
-
-# User registration
-@app.post("/register/")
-async def register(user: UserWithoutRole) -> dict:
-    """Register a new user.
-
-    Args:
-        user: User object containing username and password
-
-    Returns:
-        A message confirming successful registration
-
-    Raises:
-        HTTPException: If the username is already registered
-    """
-    if user.username in fake_db:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    fake_db[user.username] = {
-        "password": hash_password(user.password),
-        "role": "user"
-    }
-    return {"message": "User registered successfully"}
-
-# User login
-@app.post("/login/", response_model=TokenSchema)
-async def login(user: UserWithoutRole) -> dict:
-    """Authenticate a user and generate a JWT token.
-
-    Args:
-        user: User object containing username and password
-
-    Returns:
-        A token object containing the JWT token and token type
-
-    Raises:
-        HTTPException: If the credentials are invalid
-    """
-    if (user.username not in fake_db or
-            not verify_password(user.password, fake_db[user.username]["password"])):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    role = fake_db[user.username]["role"]
-    token = create_jwt_token(
-        {"sub": user.username, "role": role},
-        timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    return {"token": token, "token_type": "bearer"}
-
-# This is an example of a protected endpoint that needs authentication
-@app.get("/test/auth/protected/")
-@authenticate_user
-async def protected_route(request: Request):
-    """Protected route that requires authentication.
-
-    Args:
-        request: The request object containing user information
-
-    Returns:
-        A message confirming access to the protected route
-    """
-    user = request.state.user
-    return {"message": f"Hello, {user['username']}. You have access to this protected route."}
-
-# This is a public endpoint
-@app.get("/test/auth/public/")
-async def public_route():
-    """Public route that doesn't require authentication.
-
-    Returns:
-        A message indicating this is a public route
-    """
-    return {"message": "Hello, this is a public route."}
-
-# This is an example of a protected endpoint that needs authentication and authorization
-@app.get("/test/auth/admin/")
-@authenticate_user
-@authorize_roles("admin", "superadmin")
-async def admin_route(_request: Request):
-    """Admin route that requires authentication and admin role.
-
-    Args:
-        _request: The request object (unused but required by decorator)
-
-    Returns:
-        A message confirming access to the admin route
-    """
-    return {"message": "Hello, admin. You have access to this admin route."}
+def authorize_roles(*roles):
+    """Decorator to check if authenticated user has required role."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, request: Request, **kwargs):
+            user = request.state.user
+            if user["role"] not in roles:
+                raise HTTPException(status_code=403, detail="Insufficient permissions")
+            return await func(*args, request=request, **kwargs)
+        return wrapper
+    return decorator

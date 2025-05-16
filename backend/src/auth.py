@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from .shared.auth import authenticate_user, authorize_roles, UserWithoutRole, TokenSchema
+from .shared.metrics import setup_metrics
 
 load_dotenv()
 
@@ -20,6 +21,9 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 app = FastAPI()
+# Setup Prometheus metrics
+setup_metrics(app)
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -69,6 +73,12 @@ def create_jwt_token(data: dict, expires_delta: timedelta = None) -> str:
     expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY.encode(), ALGORITHM)
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    """Health check endpoint to verify service status."""
+    return {"status": "healthy"}
 
 # User registration
 @app.post("/register/")
