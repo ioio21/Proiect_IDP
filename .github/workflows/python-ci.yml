@@ -97,6 +97,17 @@ jobs:
           ${{ secrets.DOCKER_USERNAME }}/orders-service:latest
           ghcr.io/${{ github.repository_owner }}/orders-service:latest
         
+    - name: Build Payment Service Container
+      uses: docker/build-push-action@v4
+      with:
+        context: ./backend
+        file: ./backend/Payment.Dockerfile
+        push: true
+        public: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/payment-service:latest
+          ghcr.io/${{ github.repository_owner }}/payment-service:latest
+        
         
         
         
