@@ -33,6 +33,14 @@ data:
               - /orders
             strip_path: true
 
+      - name: payment-service
+        url: http://payment-service:8000
+        routes:
+          - name: payment-service-route
+            paths:
+              - /payment
+            strip_path: true
+      
       - name: database-service
         url: http://database-service:8000
         routes:
