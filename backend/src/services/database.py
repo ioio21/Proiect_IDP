@@ -1,5 +1,4 @@
 """Database connection and session management module."""
-import os   
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -16,7 +15,7 @@ load_dotenv()
 # DB_HOST = os.getenv("POSTGRES_HOST", "postgres")
 # DB_PORT = os.getenv("POSTGRES_PORT", "5432")
 
-DATABASE_URL = f"postgresql://postgres:admin@localhost:5432/app"
+DATABASE_URL = "postgresql://postgres:admin@localhost:5432/app"
 
 print(DATABASE_URL)
 
