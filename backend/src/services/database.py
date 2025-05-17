@@ -18,6 +18,8 @@ DB_PORT = os.getenv("POSTGRES_PORT", "5432")
 
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+print(DATABASE_URL)
+
 # Creare engine SQLAlchemy
 engine = create_engine(DATABASE_URL)
 
