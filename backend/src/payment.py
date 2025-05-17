@@ -1,7 +1,6 @@
 """Payment service."""
 
 from fastapi import FastAPI, HTTPException, Depends, Request
-from pydantic import BaseModel
 from .services.database import get_db
 from .services import crud
 from .shared.auth import authenticate_user
