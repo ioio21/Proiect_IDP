@@ -70,7 +70,6 @@ jobs:
         context: ./backend
         file: ./backend/Auth.Dockerfile
         push: true
-        public: true
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
           ghcr.io/${{ github.repository_owner }}/auth-service:latest
@@ -81,7 +80,6 @@ jobs:
         context: ./backend
         file: ./backend/Product.Dockerfile
         push: true
-        public: true
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/product-service:latest
           ghcr.io/${{ github.repository_owner }}/product-service:latest
@@ -92,7 +90,6 @@ jobs:
         context: ./backend
         file: ./backend/Orders.Dockerfile
         push: true
-        public: true
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/orders-service:latest
           ghcr.io/${{ github.repository_owner }}/orders-service:latest
@@ -103,7 +100,6 @@ jobs:
         context: ./backend
         file: ./backend/Payment.Dockerfile
         push: true
-        public: true
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/payment-service:latest
           ghcr.io/${{ github.repository_owner }}/payment-service:latest
