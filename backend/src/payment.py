@@ -9,10 +9,10 @@ from .shared.auth import authenticate_user
 app = FastAPI()
 
 class PaymentResponse(BaseModel):
-    oder_id: int
+    order_id: int
     amount: float
     
-@app.post("/{oder_id}/pay")
+@app.post("/{order_id}/pay")
 @authenticate_user
 def pay_order(order_id: int, request: Request, db = Depends(get_db)):
     """Pay for an order."""
