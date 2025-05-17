@@ -52,14 +52,6 @@ def verify_password(plain_password, hashed_password) -> bool:
     """
     return pwd_context.verify(plain_password, hashed_password)
 
-# Fake database. To be removed
-fake_db = {
-    "admin": {
-        "password": hash_password("admin"),
-        "role": "admin",
-    }
-}
-
 
 def create_jwt_token(data: dict, expires_delta: timedelta = None) -> str:
     """Create a JWT token with the provided data and expiration.
@@ -96,7 +88,7 @@ async def register(user: UserWithoutRole, db = Depends(get_db)) -> dict:
     Raises:
         HTTPException: If the username is already registered
     """
-    if user.username in fake_db:
+    if crud.get_user_by_username(db, user.username) is not None:
         raise HTTPException(status_code=400, detail="Username already registered")
     crud.create_user(db, user.username, user.password)
     return {"message": "User registered successfully"}
@@ -153,7 +145,7 @@ async def public_route():
 @app.get("/test/auth/admin/")
 @authenticate_user
 @authorize_roles("admin", "superadmin")
-async def admin_route(_request: Request):
+async def admin_route(request: Request):
     """Admin route that requires authentication and admin role.
 
     Args:
@@ -162,4 +154,5 @@ async def admin_route(_request: Request):
     Returns:
         A message confirming access to the admin route
     """
-    return {"message": "Hello, admin. You have access to this admin route."}
+    user = request.state.user
+    return {"message": f"Hello, {user['username']}. You have access to this admin route."}
