@@ -8,11 +8,7 @@ from .shared.auth import authenticate_user
 
 app = FastAPI()
 
-class PaymentResponse(BaseModel):
-    order_id: int
-    amount: float
-    
-@app.post("/{order_id}/pay")
+@app.post("/")
 @authenticate_user
 def pay_order(order_id: int, request: Request, db = Depends(get_db)):
     """Pay for an order."""
@@ -28,6 +24,6 @@ def pay_order(order_id: int, request: Request, db = Depends(get_db)):
         status = crud.set_order_status(db, order_id=order_id, status="paid")
         if not status:
             raise HTTPException(status_code=404, detail="Order not found")
-        return status
+        return {"message": "Order paid successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
