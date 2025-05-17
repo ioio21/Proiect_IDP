@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from typing import List
 
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query, Depends, Request
 from pydantic import BaseModel
 
 from .services.database import get_db
@@ -96,7 +96,7 @@ def search_products(
 @app.post("/products", response_model=ProductResponse)
 @authenticate_user
 @authorize_roles("admin", "superadmin")
-def create_product(product: ProductResponse, db = Depends(get_db)):
+def create_product(product: ProductResponse, request: Request, db = Depends(get_db)):
     """Create a new product."""
     try:
         product = crud.create_product(db, product.id, product.title, product.authors, product.published_date, product.description, product.price, product.quantity)
