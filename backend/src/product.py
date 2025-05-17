@@ -67,7 +67,7 @@ def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
-@app.get("/products", response_model=List[ProductResponse])
+@app.get("/products")
 def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
     """Get all available products."""
     try:
@@ -78,7 +78,7 @@ def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 
-@app.get("/products/search", response_model=List[ProductResponse])
+@app.get("/products/search")
 def search_products(
     q: str = Query(..., description="Search query"),
     skip: int = 0,
