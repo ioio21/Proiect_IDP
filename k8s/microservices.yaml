@@ -60,11 +60,6 @@ spec:
         envFrom:
         - secretRef:
             name: postgres-secret
-        env:
-        - name: POSTGRES_HOST
-          value: "postgres"
-        - name: POSTGRES_PORT
-          value: "5432"
         ports:
         - containerPort: 8000
 ---
