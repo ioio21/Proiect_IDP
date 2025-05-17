@@ -95,6 +95,16 @@ services:
     expose:
       - 8000
 
+  # Payment service
+  payment-service:
+    build:
+      context: ./backend
+      dockerfile: Payment.Dockerfile
+    container_name: payment-service
+    restart: always
+    expose:
+      - 8000
+
   # Database service
   database-service:
     build:
