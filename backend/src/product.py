@@ -107,14 +107,19 @@ def create_product(product: ProductResponse, request: Request, db = Depends(get_
 @app.get("/user/{username}")
 @authenticate_user
 def get_user_products(
-    user_id: int,
+    username: str,
     request: Request,
     db = Depends(get_db)
 ):
     """Get all products owned by a specific user."""
     try:
+        user = crud.get_user_by_username(db, username=username)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        if user.username != request.state.user["username"]:
+            raise HTTPException(status_code=403, detail="User is not the owner of the products")
         # Get user's orders
-        orders = crud.get_user_orders(db, user_id=user_id)
+        orders = crud.get_user_orders(db, user_id=user.id)
         # Extract products from orders
         products = [order["product_id"] for order in orders]
         return products
