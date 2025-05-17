@@ -87,20 +87,20 @@ def search_products(
 ):
     """Search for products by title, author, or description."""
     try:
-        products = crud.search_products(db, query=q, skip=skip, limit=limit)
+        products = crud.get_products(db, query=q, skip=skip, limit=limit)
         return products
     except Exception as e:
         logger.error("Error searching products: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
     
-@app.post("/products", response_model=ProductResponse)
+@app.post("/products")
 @authenticate_user
 @authorize_roles("admin", "superadmin")
 def create_product(product: ProductResponse, request: Request, db = Depends(get_db)):
     """Create a new product."""
     try:
         product = crud.create_product(db, product)
-        return product
+        return {"message": "Product created successfully"}
     except Exception as e:
         logger.error("Error creating product: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e

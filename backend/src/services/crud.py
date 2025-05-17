@@ -26,9 +26,23 @@ def get_product(db: Session, product_id: int):
     """Obține un produs după ID"""
     return db.query(models.Product).filter(models.Product.id == product_id).first()
 
-def get_products(db: Session, skip: int = 0, limit: int = 100):
+def get_products(db: Session, query: str = None, skip: int = 0, limit: int = 100):
     """Obține o listă de produse"""
-    return db.query(models.Product).offset(skip).limit(limit).all()
+    if query:
+        products = db.query(models.Product).filter(models.Product.title.ilike(f"%{query}%")).offset(skip).limit(limit).all()
+    else:
+        products = db.query(models.Product).offset(skip).limit(limit).all()
+    return [
+        {
+            "id": product.id,
+            "title": product.title,
+            "authors": product.authors,
+            "published_date": product.published_date,
+            "description": product.description,
+            "price": product.price
+        }
+        for product in products
+    ]
 
 def create_product(db: Session, product):
     """Creează un produs nou"""
@@ -58,3 +72,13 @@ def get_orders(db: Session):
 def get_user_orders(db: Session, user_id: int):
     """Obține comenzile unui utilizator"""
     return db.query(models.Order).filter(models.Order.user_id == user_id).all()
+
+def set_order_status(db: Session, order_id: int, status: str):
+    """Setează statutul unei comenzi"""
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        return None
+    order.status = status
+    db.commit()
+    db.refresh(order)
+    return order.status
