@@ -37,7 +37,6 @@ def get_products(db: Session, query: str = None, skip: int = 0, limit: int = 100
             "id": product.id,
             "title": product.title,
             "authors": product.authors,
-            "published_date": product.published_date,
             "description": product.description,
             "price": product.price
         }
