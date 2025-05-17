@@ -10,7 +10,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configurarea conexiunii la baza de date
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db/scientific_papers")
+DB_USER = os.getenv("POSTGRES_USER", "admin")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
+DB_NAME = os.getenv("POSTGRES_DB", "app")
+DB_HOST = os.getenv("POSTGRES_HOST", "postgres")
+DB_PORT = os.getenv("POSTGRES_PORT", "5432")
+
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Creare engine SQLAlchemy
 engine = create_engine(DATABASE_URL)
