@@ -107,7 +107,7 @@ def create_product(product: ProductResponse, request: Request, db = Depends(get_
 @app.get("/user/{username}")
 @authenticate_user
 def get_user_products(
-    username: str,
+    username: str,  
     request: Request,
     db = Depends(get_db)
 ):
