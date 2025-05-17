@@ -26,6 +26,7 @@ echo -e "${YELLOW}Pulling images...${NC}"
 docker pull ghcr.io/ioio21/auth-service:latest
 docker pull ghcr.io/ioio21/product-service:latest
 docker pull ghcr.io/ioio21/orders-service:latest
+docker pull ghcr.io/ioio21/payment-service:latest
 
 echo -e "${YELLOW}Starting deployment of microservices...${NC}"
 
@@ -65,6 +66,26 @@ kubectl $KUBECTL_OPTS wait --namespace microservices \
   --selector=app=kong \
   --timeout=120s
 
+# Apply Prometheus
+apply_manifest "./k8s/prometheus.yaml"
+
+# Wait for Prometheus to be ready
+echo -e "${YELLOW}Waiting for Prometheus to be ready...${NC}"
+kubectl $KUBECTL_OPTS wait --namespace microservices \
+  --for=condition=ready pod \
+  --selector=app=prometheus \
+  --timeout=120s
+
+# Apply Grafana
+apply_manifest "./k8s/grafana.yaml"
+
+# Wait for Grafana to be ready
+echo -e "${YELLOW}Waiting for Grafana to be ready...${NC}"
+kubectl $KUBECTL_OPTS wait --namespace microservices \
+  --for=condition=ready pod \
+  --selector=app=grafana \
+  --timeout=120s
+
 # Apply microservices
 apply_manifest "./k8s/microservices.yaml"
 
@@ -92,4 +113,6 @@ echo -e "${GREEN}Kong proxy is available at: http://${KONG_IP}${NC}"
 echo -e "${GREEN}Available endpoints:${NC}"
 echo -e "  - Auth Service: http://${KONG_IP}/auth"
 echo -e "  - Product Service: http://${KONG_IP}/products"
-echo -e "  - Orders Service: http://${KONG_IP}/orders" 
+echo -e "  - Orders Service: http://${KONG_IP}/orders"
+echo -e "  - Prometheus: http://${KONG_IP}/prometheus"
+echo -e "  - Grafana: http://${KONG_IP}/grafana" 
