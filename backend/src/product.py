@@ -67,7 +67,7 @@ def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
-@app.get("/products")
+@app.get("/")
 def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
     """Get all available products."""
     try:
@@ -78,7 +78,7 @@ def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 
-@app.get("/products/search")
+@app.get("/search")
 def search_products(
     q: str = Query(..., description="Search query"),
     skip: int = 0,
@@ -93,7 +93,7 @@ def search_products(
         logger.error("Error searching products: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
     
-@app.post("/products")
+@app.post("/")
 @authenticate_user
 @authorize_roles("admin", "superadmin")
 def create_product(product: ProductResponse, request: Request, db = Depends(get_db)):
@@ -105,7 +105,7 @@ def create_product(product: ProductResponse, request: Request, db = Depends(get_
         logger.error("Error creating product: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
-@app.get("/products/user/{user_id}", response_model=List[ProductResponse])
+@app.get("/user/{username}")
 @authenticate_user
 def get_user_products(
     user_id: int,
@@ -117,7 +117,7 @@ def get_user_products(
         # Get user's orders
         orders = crud.get_user_orders(db, user_id=user_id)
         # Extract products from orders
-        products = [order.product for order in orders]
+        products = [order["product_id"] for order in orders]
         return products
     except Exception as e:
         logger.error("Error retrieving user products: %s", str(e))

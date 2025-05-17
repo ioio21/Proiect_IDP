@@ -70,7 +70,15 @@ def get_orders(db: Session):
 
 def get_user_orders(db: Session, user_id: int):
     """Obține comenzile unui utilizator"""
-    return db.query(models.Order).filter(models.Order.user_id == user_id).all()
+    orders = db.query(models.Order).filter(models.Order.user_id == user_id).all()
+    return [
+        {
+            "id": order.id,
+            "product_id": order.product_id,
+            "status": order.status
+        }
+        for order in orders
+    ]
 
 def set_order_status(db: Session, order_id: int, status: str):
     """Setează statutul unei comenzi"""

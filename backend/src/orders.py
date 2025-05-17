@@ -53,7 +53,7 @@ def health_check():
     return {"status": "healthy"}
 
 
-@app.post("/orders", response_model=OrderResponse, status_code=201)
+@app.post("/", response_model=OrderResponse, status_code=201)
 @authenticate_user
 async def create_order(order: OrderRequest, request: Request, db = Depends(get_db)):
     """Create a new order for a product."""
@@ -79,7 +79,7 @@ async def create_order(order: OrderRequest, request: Request, db = Depends(get_d
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 
-@app.get("/orders", response_model=List[OrderResponse])
+@app.get("/", response_model=List[OrderResponse])
 @authenticate_user
 @authorize_roles("admin", "superadmin")
 async def get_orders(request: Request, db = Depends(get_db)):
@@ -92,7 +92,7 @@ async def get_orders(request: Request, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 
-@app.get("/orders/{order_id}", response_model=OrderResponse)
+@app.get("/{order_id}", response_model=OrderResponse)
 @authenticate_user
 async def get_order(order_id: int, request: Request, db = Depends(get_db)):
     """Get an order by ID. Users can only view their own orders unless they are admin."""
@@ -116,7 +116,7 @@ async def get_order(order_id: int, request: Request, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 
-@app.get("/users/{username}/orders", response_model=List[OrderResponse])
+@app.get("/user/{username}", response_model=List[OrderResponse])
 @authenticate_user
 async def get_user_orders(username: str, request: Request, db = Depends(get_db)):
     """Get all orders for a specific user. Users can only view their own orders unless they are admin."""
