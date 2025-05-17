@@ -30,6 +30,14 @@ def get_products(db: Session, skip: int = 0, limit: int = 100):
     """Obține o listă de produse"""
     return db.query(models.Product).offset(skip).limit(limit).all()
 
+def create_product(db: Session, product):
+    """Creează un produs nou"""
+    db_product = models.Product(id=product.id, title=product.title, authors=product.authors, published_date=product.published_date, description=product.description, price=product.price, quantity=product.quantity)
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    return db_product
+
 # Funcții CRUD pentru comenzi
 def create_order(db: Session, user_id: int, product_id: int):
     """Creează o comandă nouă"""

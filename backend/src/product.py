@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from .services.database import get_db
 from .services import crud
 from .shared.metrics import setup_metrics
+from .shared.auth import authenticate_user, authorize_roles
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -90,4 +91,16 @@ def search_products(
         return products
     except Exception as e:
         logger.error("Error searching products: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
+    
+@app.post("/products", response_model=ProductResponse)
+@authenticate_user
+@authorize_roles("admin", "superadmin")
+def create_product(product: ProductResponse, db = Depends(get_db)):
+    """Create a new product."""
+    try:
+        product = crud.create_product(db, product.id, product.title, product.authors, product.published_date, product.description, product.price, product.quantity)
+        return product
+    except Exception as e:
+        logger.error("Error creating product: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
