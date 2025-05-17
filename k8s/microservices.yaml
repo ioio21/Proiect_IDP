@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: auth-service
-  namespace: microservices
+  namespace: microservices 
 spec:
   replicas: 1
   selector:
@@ -16,13 +16,11 @@ spec:
       containers:
       - name: auth-service
         image: ghcr.io/ioio21/auth-service:latest
-        env:
-        - name: SECRET_KEY
-          value: "your-secret-key"
-        - name: ALGORITHM
-          value: "HS256"
-        - name: ACCESS_TOKEN_EXPIRE_MINUTES
-          value: "30"
+        envFrom:
+        - secretRef:
+            name: auth-secret
+        - secretRef:
+            name: postgres-secret
         ports:
         - containerPort: 8000
 ---
@@ -59,6 +57,8 @@ spec:
         image: ghcr.io/ioio21/product-service:latest
         envFrom:
         - secretRef:
+            name: product-secret
+        - secretRef:
             name: postgres-secret
         ports:
         - containerPort: 8000
@@ -94,6 +94,11 @@ spec:
       containers:
       - name: orders-service
         image: ghcr.io/ioio21/orders-service:latest
+        envFrom:
+        - secretRef:
+            name: orders-secret
+        - secretRef:
+            name: postgres-secret
         ports:
         - containerPort: 8000
 ---
