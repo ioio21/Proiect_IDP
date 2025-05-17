@@ -5,7 +5,6 @@ and creating orders by interacting with the database service.
 """
 import logging
 from datetime import datetime
-from typing import List
 
 from fastapi import FastAPI, HTTPException, Query, Depends, Request
 from pydantic import BaseModel
