@@ -8,9 +8,11 @@ from datetime import datetime, timedelta
 
 import jwt
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+from .services.database import get_db
+from .services import crud
 from .shared.auth import authenticate_user, authorize_roles, UserWithoutRole, TokenSchema
 from .shared.metrics import setup_metrics
 
@@ -82,7 +84,7 @@ def health_check():
 
 # User registration
 @app.post("/register/")
-async def register(user: UserWithoutRole) -> dict:
+async def register(user: UserWithoutRole, db = Depends(get_db)) -> dict:
     """Register a new user.
 
     Args:
@@ -96,15 +98,12 @@ async def register(user: UserWithoutRole) -> dict:
     """
     if user.username in fake_db:
         raise HTTPException(status_code=400, detail="Username already registered")
-    fake_db[user.username] = {
-        "password": hash_password(user.password),
-        "role": "user"
-    }
+    crud.create_user(db, user.username, user.password)
     return {"message": "User registered successfully"}
 
 # User login
 @app.post("/login/", response_model=TokenSchema)
-async def login(user: UserWithoutRole) -> dict:
+async def login(user: UserWithoutRole, db = Depends(get_db)) -> dict:
     """Authenticate a user and generate a JWT token.
 
     Args:
@@ -116,10 +115,9 @@ async def login(user: UserWithoutRole) -> dict:
     Raises:
         HTTPException: If the credentials are invalid
     """
-    if (user.username not in fake_db or
-            not verify_password(user.password, fake_db[user.username]["password"])):
+    if crud.get_user_by_username(db, user.username) is None:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    role = fake_db[user.username]["role"]
+    role = crud.get_user_by_username(db, user.username).role
     token = create_jwt_token(
         {"sub": user.username, "role": role},
         timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

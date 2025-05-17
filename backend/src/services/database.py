@@ -8,13 +8,6 @@ from dotenv import load_dotenv
 # Încărcăm variabilele de mediu
 load_dotenv()
 
-# # Configurarea conexiunii la baza de date
-# DB_USER = os.getenv("POSTGRES_USER", "admin")
-# DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
-# DB_NAME = os.getenv("POSTGRES_DB", "app")
-# DB_HOST = os.getenv("POSTGRES_HOST", "postgres")
-# DB_PORT = os.getenv("POSTGRES_PORT", "5432")
-
 DATABASE_URL = "postgresql://postgres:admin@localhost:5432/app"
 
 print(DATABASE_URL)
