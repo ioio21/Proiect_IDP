@@ -149,7 +149,7 @@ async def public_route():
     Returns:
         A message indicating this is a public route
     """
-    return {"message": "Hello, this is a public route."}
+    return {"message": "Hello, this is a public route. v2"}
 
 # This is an example of a protected endpoint that needs authentication and authorization
 @app.get("/test/auth/admin/")
