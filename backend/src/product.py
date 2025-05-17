@@ -99,7 +99,7 @@ def search_products(
 def create_product(product: ProductResponse, request: Request, db = Depends(get_db)):
     """Create a new product."""
     try:
-        product = crud.create_product(db, product.id, product.title, product.authors, product.published_date, product.description, product.price, product.quantity)
+        product = crud.create_product(db, product.id, product.title, product.authors, product.published_date, product.description, product.price)
         return product
     except Exception as e:
         logger.error("Error creating product: %s", str(e))
