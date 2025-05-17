@@ -99,8 +99,26 @@ def search_products(
 def create_product(product: ProductResponse, request: Request, db = Depends(get_db)):
     """Create a new product."""
     try:
-        product = crud.create_product(db, product.id, product.title, product.authors, product.published_date, product.description, product.price)
+        product = crud.create_product(db, product)
         return product
     except Exception as e:
         logger.error("Error creating product: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
+
+@app.get("/products/user/{user_id}", response_model=List[ProductResponse])
+@authenticate_user
+def get_user_products(
+    user_id: int,
+    request: Request,
+    db = Depends(get_db)
+):
+    """Get all products owned by a specific user."""
+    try:
+        # Get user's orders
+        orders = crud.get_user_orders(db, user_id=user_id)
+        # Extract products from orders
+        products = [order.product for order in orders]
+        return products
+    except Exception as e:
+        logger.error("Error retrieving user products: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
