@@ -61,13 +61,13 @@ class OrderResponse(BaseModel):
 
 
 @app.get("/health")
-def health_check():
+async def health_check():
     """Health check endpoint to verify service status."""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
 @app.get("/")
-def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
+async def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
     """Get all available products."""
     try:
         products = crud.get_products(db, skip=skip, limit=limit)
@@ -78,7 +78,7 @@ def get_products(skip: int = 0, limit: int = 100, db = Depends(get_db)):
 
 
 @app.get("/search")
-def search_products(
+async def search_products(
     q: str = Query(..., description="Search query"),
     skip: int = 0,
     limit: int = 100,
@@ -95,7 +95,7 @@ def search_products(
 @app.post("/")
 @authenticate_user
 @authorize_roles("admin", "superadmin")
-def create_product(product: ProductResponse, request: Request, db = Depends(get_db)):
+async def create_product(product: ProductResponse, request: Request, db = Depends(get_db)):
     """Create a new product."""
     try:
         product = crud.create_product(db, product)
@@ -106,7 +106,7 @@ def create_product(product: ProductResponse, request: Request, db = Depends(get_
 
 @app.get("/user/{username}")
 @authenticate_user
-def get_user_products(
+async def get_user_products(
     username: str,  
     request: Request,
     db = Depends(get_db)

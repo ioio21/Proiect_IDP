@@ -48,7 +48,7 @@ class OrderResponse(BaseModel):
 
 # Health endpoint
 @app.get("/health")
-def health_check():
+async def health_check():
     """Health check endpoint to verify service status."""
     return {"status": "healthy"}
 
